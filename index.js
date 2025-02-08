@@ -4,22 +4,22 @@ const tmi = require('tmi.js'),
 
 
     { channel, username, password, Clientid, secret } = require('./settings.json');
-const { log } = require('console');
+   
+    const client = new tmi.Client(
+        {
+            options: { debug: true },
+            connection: {
+                reconnect: true,
+                secure: true,
+            },
+            identity: {
+                username,
+                password
+            },
+            channels: [channel]
+        }
+    );
 
-const options = {
-    options: { debug: true },
-    connection: {
-        reconnect: true,
-        secure: true,
-    },
-    identity: {
-        username,
-        password
-    },
-    channels: [channel]
-};
-
-const client = new tmi.Client(options);
 client.connect().catch(console.error);
 
 client.on('subscription', (channel, username, method, message, userstate) => {
@@ -27,13 +27,13 @@ client.on('subscription', (channel, username, method, message, userstate) => {
     client.say(channel, `Thanks for subscribing, ${username}!`);
 });
 
-client.on("subgift", (channel, username, streakMonths, recipient, methods, userstate) => {
+client.on("subgift", (channel, username, streakMonths, recipient, methods, userstate, sharedStreak, cumulativeMonths) => {
     let senderCount = ~~userstate["msg-param-sender-count"];
     if (senderCount > 1) {
         client.say(channel, `${username} has Gifted ${senderCount} subs Thank you`)
     }
-    else (
-        client.say(channel, `${username} has Gifted a sub to ${recipient} thank you`))
+    else {
+        client.say(channel, `${username} has Gifted a sub to ${recipient} thank you`)}
 
     if (sharedStreak) {
             client.say(channel, `Thanks for resubscribing for ${streakMonths} consecutive months, ${username}!`);
@@ -44,7 +44,7 @@ client.on("subgift", (channel, username, streakMonths, recipient, methods, users
 });
 
 client.on("anongiftpaidupgrade", (channel, username, userstate) => {
-    client.say(channel, `${username} has upgraded their sub Thank you`)
+    client.say(channel, `${userstate.username} has upgraded their sub Thank you`)
 });
 
 client.on('resub', (channel, username, _months, message, userstate, methods) => {
@@ -64,25 +64,14 @@ client.on("cheer", (channel, userstate, message) => {
     client.say(channel, `${userstate.username} has cheered ${userstate.bits} bits thank you`)
 });
 
-client.on('connected', () => {
-    client.say(channel, 'Connected');
-});
-
 client.on("raided", (channel, username, viewers) => {
     client.say(channel, ` ${username} has raided with ` + viewers + ` viewer(s)`)
     console.log('test')
 });
 
-
-
-var horror = 0;
-var cum = 0;
-
-client.on('message', (channel, user, message, self) => {
-    if (self) return;
-
+client.on("message", (channel, userstate, message, self, user, username) => {
     if (message == '!hello') {
-        client.say(channel, `@${user.username}, hello everyone i am a bot!`);
+        client.say(channel, "Working");
     }
 
     if (message == '!welcome') {
@@ -103,34 +92,12 @@ client.on('message', (channel, user, message, self) => {
     }
 
     if (message == '!yt') {
-        client.say(channel, `@${user.username} Regen's youtube link is https://www.youtube.com/channel/UC74a9DHia0rDbDIPdi_x4Hw`);
+        client.say(channel, `Regen's youtube link is https://www.youtube.com/channel/UC74a9DHia0rDbDIPdi_x4Hw`);
     }
 
     if (message == '!discord') {
-        client.say(channel, `@${user.username} The Regeneration Station's Link is https://discord.gg/DYERhSKsED`);
+        client.say(channel, `The Regeneration Station's Link is https://discord.gg/DYERhSKsED`);
     }
-
-    //if(message == '!h-word') {
-    //    horror++;
-    //    client.say(channel, `Norm has said horror ` +horror+ ` Times this stream`)  
-    //}
-
-    if (message == '!cum') {
-        cum++;
-        client.say(channel, `Yep CUM monkaOMEGA ... Chat has coomed ` + cum + ` times`)
-    }
-
-    if (message == '^') {
-        client.say(channel, `HAHA Funny MEME KEKW OMEGALUL`)
-    }
-
-    ///if (message == '!Bad') {
-    ///    client.say(channel, `@Normanate just got Sh*t on KEKW. I wonder what he will do next`)
-    ///}
-
-    //if(message == '!hype') {
-    //    client.say(channel, `Pog Pog Pog Pog pepePoint  Lets Go Norm PepeLaugh also Norm has PepegaAim`)
-    //} //Pog Pog Pog Pog pepePoint  Lets Go Norm PepeLaugh also Norm has PepegaAim
 
     if (message == 'lol') {
         client.say(channel, `OMEGALUL KEKW OMEGALUL KEKW OMEGALUL KEKW OMEGALUL KEKW`)
@@ -141,19 +108,19 @@ client.on('message', (channel, user, message, self) => {
     }
 
     if (message == `!send`) {
-        client.say(channel, ` Ima just Sendddd it alalalalalalal`)
+        client.say(channel, `Ima just Sendddd it`)
     }
 
     if (message == `!commands`) {
-        client.say(channel, `The Commands are !roll #, !discord, !nut, !yt, !hype, !Bad, and tiggers are , ^ , lol`)
+        client.say(channel, `The Commands are !roll #, !discord, !nut, !yt, !hype, !Bad, and tiggers are , lol`)
     }
-
+    
     if (message == `!disconnect`) {
         client.disconnect()
     }
 
     if (message == `Hydrate`) {
-        client.say(channel, `Yall Best be getting water.... Char this includes you as well`)
+        client.say(channel, `Yall Best be getting water.... Chat this includes yall as well`)
     }
 
     if (message == `!21st`) {
@@ -220,16 +187,4 @@ function completeShoutout(id, channel, client) {
         client.say(channel, "Insert no user found");
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
